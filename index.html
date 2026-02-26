@@ -1,0 +1,242 @@
+﻿<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Badminton Cost Calculator</title>
+  <style>
+    :root {
+      --bg: #f3f5f7;
+      --card: #ffffff;
+      --text: #13253a;
+      --muted: #4d5d6b;
+      --accent: #0b8a5b;
+      --accent-2: #0f6a47;
+      --border: #d7dde2;
+      --shadow: 0 10px 24px rgba(0, 0, 0, 0.08);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100dvh;
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(160deg, #f7fafc 0%, #eaf2f6 100%);
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+
+    .app {
+      width: 100%;
+      max-width: 440px;
+      background: var(--card);
+      border-radius: 18px;
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .header {
+      padding: 18px 18px 12px;
+      background: linear-gradient(135deg, var(--accent) 0%, var(--accent-2) 100%);
+      color: #fff;
+    }
+
+    .header h1 {
+      margin: 0;
+      font-size: 1.15rem;
+      font-weight: 700;
+      letter-spacing: 0.2px;
+    }
+
+    .header p {
+      margin: 6px 0 0;
+      font-size: 0.9rem;
+      opacity: 0.95;
+    }
+
+    .content {
+      padding: 16px;
+      display: grid;
+      gap: 12px;
+    }
+
+    .field {
+      display: grid;
+      gap: 6px;
+    }
+
+    label {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--muted);
+    }
+
+    select,
+    input {
+      width: 100%;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px;
+      font-size: 1rem;
+      background: #fff;
+      color: var(--text);
+    }
+
+    select:focus,
+    input:focus {
+      outline: 2px solid color-mix(in srgb, var(--accent) 30%, white);
+      border-color: var(--accent);
+    }
+
+    .fixed {
+      background: #f7fbf9;
+      border: 1px solid #cae4d8;
+      color: #155d42;
+      font-weight: 600;
+    }
+
+    .results {
+      margin-top: 6px;
+      padding: 14px;
+      border-radius: 12px;
+      background: #f7fafc;
+      border: 1px solid var(--border);
+      display: grid;
+      gap: 8px;
+    }
+
+    .result-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      font-size: 0.95rem;
+    }
+
+    .result-row strong {
+      font-size: 1rem;
+    }
+
+    .footer-note {
+      color: var(--muted);
+      font-size: 0.8rem;
+      line-height: 1.4;
+      margin-top: 4px;
+    }
+
+    @media (max-width: 360px) {
+      .header h1 {
+        font-size: 1.05rem;
+      }
+
+      select,
+      input {
+        font-size: 0.95rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="app" role="main" aria-label="Badminton Cost Calculator">
+    <section class="header">
+      <h1>Badminton Cost Calculator</h1>
+      <p>Split court and shuttlecock costs equally (THB)</p>
+    </section>
+
+    <section class="content">
+      <div class="field">
+        <label for="players">Number of players</label>
+        <select id="players" aria-label="Number of players"></select>
+      </div>
+
+      <div class="field">
+        <label for="shuttles">Number of shuttlecocks used</label>
+        <select id="shuttles" aria-label="Number of shuttlecocks used"></select>
+      </div>
+
+      <div class="field">
+        <label for="shuttlePrice">Price per shuttlecock (THB)</label>
+        <input id="shuttlePrice" type="number" min="0" step="1" value="30" inputmode="numeric" aria-label="Price per shuttlecock in THB">
+      </div>
+
+      <div class="field">
+        <label for="courtPrice">Court price (THB)</label>
+        <input id="courtPrice" class="fixed" type="text" value="440" readonly aria-readonly="true">
+      </div>
+
+      <section class="results" aria-live="polite">
+        <div class="result-row">
+          <span>Shuttlecock cost</span>
+          <strong id="shuttleTotal">THB 0.00</strong>
+        </div>
+        <div class="result-row">
+          <span>Total session cost</span>
+          <strong id="sessionTotal">THB 0.00</strong>
+        </div>
+        <div class="result-row">
+          <span>Cost per player</span>
+          <strong id="perPlayer">THB 0.00</strong>
+        </div>
+      </section>
+
+      <p class="footer-note">Court price is fixed at THB 440. Enter your shuttlecock price to calculate the split.</p>
+    </section>
+  </main>
+
+  <script>
+    const courtPrice = 440;
+
+    const playersSelect = document.getElementById("players");
+    const shuttlesSelect = document.getElementById("shuttles");
+    const shuttlePriceInput = document.getElementById("shuttlePrice");
+
+    const shuttleTotalEl = document.getElementById("shuttleTotal");
+    const sessionTotalEl = document.getElementById("sessionTotal");
+    const perPlayerEl = document.getElementById("perPlayer");
+
+    function addOptions(select, start, end, defaultValue) {
+      for (let value = start; value <= end; value += 1) {
+        const option = document.createElement("option");
+        option.value = String(value);
+        option.textContent = String(value);
+        if (value === defaultValue) option.selected = true;
+        select.appendChild(option);
+      }
+    }
+
+    function formatTHB(value) {
+      return `THB ${value.toFixed(2)}`;
+    }
+
+    function calculate() {
+      const players = Number(playersSelect.value);
+      const shuttles = Number(shuttlesSelect.value);
+      const shuttlePrice = Math.max(0, Number(shuttlePriceInput.value) || 0);
+
+      const shuttleTotal = shuttles * shuttlePrice;
+      const sessionTotal = courtPrice + shuttleTotal;
+      const perPlayer = sessionTotal / players;
+
+      shuttleTotalEl.textContent = formatTHB(shuttleTotal);
+      sessionTotalEl.textContent = formatTHB(sessionTotal);
+      perPlayerEl.textContent = formatTHB(perPlayer);
+    }
+
+    addOptions(playersSelect, 4, 8, 6);
+    addOptions(shuttlesSelect, 1, 8, 3);
+
+    [playersSelect, shuttlesSelect, shuttlePriceInput].forEach((el) => {
+      el.addEventListener("input", calculate);
+      el.addEventListener("change", calculate);
+    });
+
+    calculate();
+  </script>
+</body>
+</html>
